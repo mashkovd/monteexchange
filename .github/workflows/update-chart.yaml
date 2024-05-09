@@ -1,0 +1,31 @@
+name: Update Helm Chart Values
+
+on:
+  workflow_run:
+    workflows: ["ci"]
+    types:
+      - completed
+
+jobs:
+  update-chart:
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout Helm chart repository
+        uses: actions/checkout@v2
+        with:
+          repository: https://github.com/mashkovd/argocdApps.git
+
+      - name: Update values.yaml
+        run: |
+          cd helm-exchange-bot
+          sed -i "s/image:.*/image: '${{ vars.DOCKERHUB_USERNAME }}\/${{ vars.APP_NAME }}:${{ steps.extract-version.outputs.version }}'/g" values.yaml
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.email "mashkovd@live.ru"
+          git config --global user.name "mashkovd"
+          git add .
+          git commit -m "Update Helm chart values"
+          git push
