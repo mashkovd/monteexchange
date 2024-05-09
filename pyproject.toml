@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "monteexchange"
-version = "0.1.0"
+version = "0.1.1"
 description = ""
 authors = ["Dmitrii.Mashkov <dmitrii.mashkov@libertexgroup.com>"]
 readme = "README.md"
