@@ -5,15 +5,13 @@ on:
     branches: main
 
 jobs:
-  login:
+  build_and_push:
     runs-on: ubuntu-latest
+    env:
+      DOCKERHUB_USERNAME: ${{ env.DOCKERHUB_USERNAME }}
+      APP_NAME: ${{ env.APP_NAME }}
 
     steps:
-      - name: Debug
-        run: |
-          echo "DOCKERHUB_USERNAME: ${{ env.DOCKERHUB_USERNAME }}"
-
-          echo "APP_NAME: ${{ env.APP_NAME }}"
 
       - name: Checkout code
         uses: actions/checkout@v2
