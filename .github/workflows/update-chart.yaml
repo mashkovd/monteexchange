@@ -17,23 +17,23 @@ jobs:
           repository: mashkovd/argocdApps
           token: ${{ secrets.HELM_REPO_TOKEN }}
 
-      - name: Download data artifact
-        uses: actions/download-artifact@v4
-        with:
-          workflow: ci
-          name: version
-          path: artifact
-
-      - name: Read data file
-        id: extract-version
-        run: |
-          version=$(cat artifact/version.txt)
-          echo "::set-output name=version::$version"
+#      - name: Download data artifact
+#        uses: actions/download-artifact@v4
+#        with:
+#          workflow: ci
+#          name: version
+#          path: artifact
+#
+#      - name: Read data file
+#        id: extract-version
+#        run: |
+#          version=$(cat artifact/version.txt)
+#          echo "::set-output name=version::$version"
 
       - name: Update values.yaml
         run: |
           cd helm-exchange-bot
-          sed -i "s/^appVersion:.*/appVersion: '${{ steps.extract-version.outputs.version }}'/" Chart.yaml
+          sed -i "s/^appVersion:.*/appVersion: '${{ env.VERSION }}'/" Chart.yaml
 
       - name: Commit and push changes
         run: |
