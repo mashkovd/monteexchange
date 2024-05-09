@@ -28,5 +28,5 @@ jobs:
           git add .
           git commit -m "Update Helm chart values"
           # Set up Git with the token for authentication
-          git config --global credential.helper store <<< "$(printf 'protocol=https\nhost=github.com\nusername=mashkovd\npassword=${{ secrets.GITHUB_TOKEN }}\n')"
+          git config --global credential.helper store <<< "$(printf 'protocol=https\nhost=github.com\nusername=mashkovd\npassword=${{ secrets.HELM_REPO_TOKEN }}\n')"
           git push
