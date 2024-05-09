@@ -18,7 +18,7 @@ jobs:
           token: ${{ secrets.HELM_REPO_TOKEN }}
 
       - name: Download data artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: version
           path: artifact
