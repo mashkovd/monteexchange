@@ -32,7 +32,7 @@ jobs:
           echo "::set-output name=version::$version"
           echo $version > version.txt
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: version
           path: version.txt
