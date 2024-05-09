@@ -32,7 +32,7 @@ jobs:
       - name: Update values.yaml
         run: |
           cd helm-exchange-bot
-          sed -i "s/^appVersion:.*/appVersion: '$${{ steps.extract-version.outputs.version }}'/" Chart.yaml
+          sed -i "s/^appVersion:.*/appVersion: '${{ steps.extract-version.outputs.version }}'/" Chart.yaml
 
       - name: Commit and push changes
         run: |
