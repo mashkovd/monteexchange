@@ -7,9 +7,6 @@ on:
 jobs:
   build_and_push:
     runs-on: ubuntu-latest
-    env:
-      DOCKERHUB_USERNAME: ${{ DOCKERHUB_USERNAME }}
-      APP_NAME: ${{ APP_NAME }}
 
     steps:
 
@@ -38,4 +35,4 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           push: true
-          tags: ${{ env.DOCKERHUB_USERNAME }}/${{ env.APP_NAME }}:${{ steps.extract-version.outputs.version }}
+          tags: ${{ vars.DOCKERHUB_USERNAME }}/${{ vars.APP_NAME }}:${{ steps.extract-version.outputs.version }}
