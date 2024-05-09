@@ -1,0 +1,13 @@
+version: '3'
+services:
+  web:
+    build:
+        context: .
+        dockerfile: Dockerfile
+    ports:
+      - "8088:8088"
+  ngrok:
+    image: ngrok/ngrok
+    environment:
+      - NGROK_AUTHTOKEN=2fyfOjtyxQuNdtPyQQicXoRQ1LL_5RShRGfdrTrbPwygPiAin
+    command: ["http", "web:8088", "--log=stdout"]
