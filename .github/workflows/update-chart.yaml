@@ -19,6 +19,7 @@ jobs:
 
       - name: Update values.yaml
         run: |
+          cd helm-exchange-bot
           sed -i "s/image:.*/image: '${{ vars.DOCKERHUB_USERNAME }}\/${{ vars.APP_NAME }}:${{ steps.extract-version.outputs.version }}'/g" values.yaml
 
       - name: Commit and push changes
