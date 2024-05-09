@@ -24,6 +24,8 @@ jobs:
 
       - name: Commit and push changes
         run: |
+          git config --global user.email "mashkovd@live.ru"
+          git config --global user.name "Dmitrii.Mashkov"
           git add .
           git commit -m "Update Helm chart values"
           git push
