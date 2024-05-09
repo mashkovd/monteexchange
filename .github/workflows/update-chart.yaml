@@ -14,7 +14,7 @@ jobs:
       - name: Checkout Helm chart repository
         uses: actions/checkout@v2
         with:
-          repository: mashkovd/argocdApps.git
+          repository: mashkovd/argocdApps
 
       - name: Update values.yaml
         run: |
