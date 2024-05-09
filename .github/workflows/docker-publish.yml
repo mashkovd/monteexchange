@@ -34,8 +34,8 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: version.txt
-          path: /artifact
+          name: version
+          path: /artifact/version.txt
 
       - name: Build and push
         uses: docker/build-push-action@v5

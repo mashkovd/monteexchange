@@ -20,8 +20,8 @@ jobs:
       - name: Download data artifact
         uses: actions/download-artifact@v4
         with:
-          name: version.txt
-          path: /artifact
+          name: version
+          path: artifact
 
       - name: Read data file
         id: extract-version
