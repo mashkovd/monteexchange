@@ -10,7 +10,7 @@ jobs:
 
     steps:
       - name: "echo variables"
-        run: echo "$Greeting $DOCKERHUB_USERNAME!"
+        run: echo $DOCKERHUB_USERNAME"
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
