@@ -7,11 +7,10 @@ on:
       - completed
 
 jobs:
-  update-chart:
+  update_helm_chart:
     runs-on: ubuntu-latest
 
     steps:
-
       - name: Checkout Helm chart repository
         uses: actions/checkout@v2
         with:
@@ -28,4 +27,6 @@ jobs:
           git config --global user.name "mashkovd"
           git add .
           git commit -m "Update Helm chart values"
+          # Set up Git with the token for authentication
+          git config --global credential.helper store <<< "$(printf 'protocol=https\nhost=github.com\nusername=mashkovd\npassword=${{ secrets.GITHUB_TOKEN }}\n')"
           git push
