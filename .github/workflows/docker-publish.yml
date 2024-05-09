@@ -8,8 +8,8 @@ jobs:
   build_and_push:
     runs-on: ubuntu-latest
     env:
-      DOCKERHUB_USERNAME: ${{ env.DOCKERHUB_USERNAME }}
-      APP_NAME: ${{ env.APP_NAME }}
+      DOCKERHUB_USERNAME: ${{ DOCKERHUB_USERNAME }}
+      APP_NAME: ${{ APP_NAME }}
 
     steps:
 
