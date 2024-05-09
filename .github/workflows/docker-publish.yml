@@ -34,4 +34,4 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.APP_NAME }}:latest-${{ steps.extract-version.outputs.version }}
+          tags: mashkovdm/exchange_bot:latest-${{ steps.extract-version.outputs.version }}
