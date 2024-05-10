@@ -1,11 +1,11 @@
-name: Continuous Integration and Deployment
+name: CI/CD
 
 on:
   push:
     branches: main
 
 jobs:
-  ci_cd_pipeline:
+  pipeline:
     runs-on: ubuntu-latest
 
     steps:
@@ -26,7 +26,6 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Extract version
-        id: extract-version
         run: |
           version=$(cat pyproject.toml | grep -oP '(?<=^version = ").*(?="$)')
           echo "APP_VERSION=${version}" >> $GITHUB_ENV
