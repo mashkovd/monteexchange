@@ -31,7 +31,8 @@ jobs:
           version=$(cat pyproject.toml | grep -oP '(?<=^version = ").*(?="$)')
           echo "::set-output name=version::$version"
           echo $version > version.txt
-          echo "VERSION=${version}" >> $GITHUB_ENV
+          echo "APP_VERSION=${version}" >> $GITHUB_ENV
+          echo $GITHUB_ENV
 
       - uses: actions/upload-artifact@v4
         with:

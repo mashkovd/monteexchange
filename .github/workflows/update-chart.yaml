@@ -33,7 +33,9 @@ jobs:
       - name: Update values.yaml
         run: |
           cd helm-exchange-bot
-          sed -i "s/^appVersion:.*/appVersion: '${{ env.VERSION }}'/" Chart.yaml
+          echo $GITHUB_ENV
+          echo ${{ env.APP_VERSION }}
+          sed -i "s/^appVersion:.*/appVersion: '${{ env.APP_VERSION }}'/" Chart.yaml
 
       - name: Commit and push changes
         run: |
