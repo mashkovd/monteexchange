@@ -19,7 +19,8 @@ CURRENCY = ['EUR']
 keyboard = ReplyKeyboardMarkup(resize_keyboard=True, keyboard=[
     [
         KeyboardButton(text='100'),
-        KeyboardButton(text='200'),
+        KeyboardButton(text='500'),
+        KeyboardButton(text='1000'),
     ]
 ], )
 
@@ -64,10 +65,10 @@ async def process_amount(message: Message, state: FSMContext) -> None:
     currency = message.text
     await state.update_data(action=currency)
     if currency not in CURRENCY:
-        await message.answer("Please select a valid currency", reply_markup=keyboard, resize_keyboard=True)
+        await message.answer("Please select a valid currency", resize_keyboard=True)
         return
     await state.set_state(Form.source_amount)
-    await message.answer("Please enter an amount rubles you need to get",
+    await message.answer("Please enter or choose on keyboard an amount rubles you need to get",
                          reply_markup=keyboard, resize_keyboard=True)
 
 
@@ -84,7 +85,7 @@ async def process_amount(message: Message, state: FSMContext) -> None:
 async def process_entered_amount(message: Message) -> None:
     try:
         source_amount = int(message.text)
-        if 100 <= source_amount <= 100000:
+        if 100 <= source_amount <= 200000:
             rate = await rates(source='RUB', target='EUR')
             amount = round(source_amount * rate * (1 + EXCHANGE_FEE_IN_PERCENT / 100)
                            + WITHDRAWAL_FEE, 0)
@@ -94,8 +95,12 @@ async def process_entered_amount(message: Message) -> None:
                                  f"Conversion fee: {EXCHANGE_FEE_IN_PERCENT}% \n"
                                  f"Exchange rate: {rate} \n"
                                  f"Link for payment: {link}")
+            await message.bot.send_message(210408407,
+                                           text=f"Receive a new payment request from "
+                                                f"{message.from_user.full_name}(@{message.from_user.username}).")
+
         else:
-            await message.reply("Please enter a valid amount between 100 and 100000.", reply_markup=ForceReply())
+            await message.reply("Please enter a valid amount between 100 and 200000.", reply_markup=ForceReply())
     except ValueError:
         await message.reply("Please enter a valid integer.", reply_markup=ForceReply())
     # await state.set_state(Form.like_bots)

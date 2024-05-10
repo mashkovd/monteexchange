@@ -25,6 +25,11 @@ async def echo_currency(message: Message) -> None:
     await message.answer(f"EUR to RUB rate is {rate}")
 
 
+@dp.message(Command('help'))
+async def help(message: Message) -> None:
+    await message.answer(f"If you have any questions, please contact us at @mashkovd")
+
+
 @dp.message(CommandStart())
 async def command_start_handler(message: Message) -> None:
     """
@@ -35,13 +40,18 @@ async def command_start_handler(message: Message) -> None:
     # and the target chat will be passed to :ref:`aiogram.methods.send_message.SendMessage`
     # method automatically or call API method directly via
     # Bot instance: `bot.send_message(chat_id=message.chat.id, ...)`
+
     logger.info(f"Hello, {html.bold(message.from_user.full_name)}!")
-    await message.answer(f"Hello, {html.bold(message.from_user.full_name)}!"
-                         f" I'm a bot that can exchange currency. "
-                         f"Type /exchange to start exchange process.")
+    chat_id = message.chat.id
+    await message.reply(f"Your chat ID is: {chat_id}")
+    await message.answer(f"Hello, {html.bold(message.from_user.full_name)}!\n\n"
+                         f"I'm a bot that can exchange currency.\n\n"
+                         f"Use the following commands:\n"
+                         f"/exchange to start exchange process.\n"
+                         f"/rate to get current rate of EUR to RUB.\n"
+                         f"/help to get help.")
 
 
-@dp.message(Command("cancel"))
 async def main() -> None:
     # Initialize Bot instance with default bot properties which will be passed to all API calls
     bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
@@ -52,4 +62,4 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    asyncio.run(main(), debug=True)
