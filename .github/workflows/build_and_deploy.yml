@@ -55,7 +55,7 @@ jobs:
         run: |
           cd helm-exchange-bot
           echo ${{ env.APP_VERSION }}
-          sed -i "s/^appVersion:.*/appVersion: '${{ env.APP_VERSION }}'/" Chart.yaml
+          sed -i 's/^appVersion:.*/appVersion: "${{ env.APP_VERSION }}"/' Chart.yaml
 
       - name: Commit and push changes
         run: |
