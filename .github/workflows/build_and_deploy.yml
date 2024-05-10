@@ -1,11 +1,11 @@
-name: ci
+name: Continuous Integration and Deployment
 
 on:
   push:
     branches: main
 
 jobs:
-  build_and_push:
+  ci_cd_pipeline:
     runs-on: ubuntu-latest
 
     steps:
@@ -29,35 +29,28 @@ jobs:
         id: extract-version
         run: |
           version=$(cat pyproject.toml | grep -oP '(?<=^version = ").*(?="$)')
-          echo "::set-output name=version::$version"
-          echo $version > version.txt
           echo "APP_VERSION=${version}" >> $GITHUB_ENV
-          echo $GITHUB_ENV
 
-      - uses: actions/upload-artifact@v4
-        with:
-          name: version
-          path: version.txt
-
-      - name: Build and push
+      - name: Build and push Docker images
         uses: docker/build-push-action@v5
         with:
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ${{ vars.DOCKERHUB_USERNAME }}/${{ vars.APP_NAME }}:${{ steps.extract-version.outputs.version }}
+          tags: ${{ vars.DOCKERHUB_USERNAME }}/${{ vars.APP_NAME }}:${{ env.APP_VERSION }}
 
       - name: Checkout Helm chart repository
         uses: actions/checkout@v4
         with:
           repository: mashkovd/argocdApps
           token: ${{ secrets.HELM_REPO_TOKEN }}
-      - name: Update values.yaml
+
+      - name: Update Helm chart values
         run: |
           cd helm-exchange-bot
-          echo ${{ env.APP_VERSION }}
+          echo "APP_VERSION=${{ env.APP_VERSION }}"
           sed -i 's/^appVersion:.*/appVersion: "${{ env.APP_VERSION }}"/' Chart.yaml
 
-      - name: Commit and push changes
+      - name: Commit and push Helm chart changes
         run: |
           git config --global user.email "mashkovd@live.ru"
           git config --global user.name "Dmitrii.Mashkov"
