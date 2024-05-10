@@ -85,7 +85,7 @@ async def process_amount(message: Message, state: FSMContext) -> None:
 async def process_entered_amount(message: Message) -> None:
     try:
         source_amount = int(message.text)
-        if 100 <= source_amount <= 200000:
+        if 10_000 <= source_amount <= 200_000:
             rate = await rates(source='RUB', target='EUR')
             amount = round(source_amount * rate * (1 + EXCHANGE_FEE_IN_PERCENT / 100)
                            + WITHDRAWAL_FEE, 0)
@@ -100,7 +100,7 @@ async def process_entered_amount(message: Message) -> None:
                                                 f"{message.from_user.full_name}(@{message.from_user.username}).")
 
         else:
-            await message.reply("Please enter a valid amount between 100 and 200000.", reply_markup=ForceReply())
+            await message.reply("Please enter a valid amount between 10_000 and 200_000.", reply_markup=ForceReply())
     except ValueError:
         await message.reply("Please enter a valid integer.", reply_markup=ForceReply())
     # await state.set_state(Form.like_bots)
