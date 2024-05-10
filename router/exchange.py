@@ -18,9 +18,9 @@ OPERATION = ['EURO2RUB', 'RUB2EURO']
 CURRENCY = ['EUR']
 keyboard = ReplyKeyboardMarkup(resize_keyboard=True, keyboard=[
     [
-        KeyboardButton(text='100'),
-        KeyboardButton(text='500'),
-        KeyboardButton(text='1000'),
+        KeyboardButton(text='30_000'),
+        KeyboardButton(text='50_000'),
+        KeyboardButton(text='60_000'),
     ]
 ], )
 
