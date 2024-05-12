@@ -8,21 +8,20 @@ from aiogram import F, html
 from typing import Any
 import logging
 from utils import payment_requests, rates
-from config import WITHDRAWAL_FEE, EXCHANGE_FEE_IN_PERCENT
+from config import WITHDRAWAL_FEE, EXCHANGE_FEE_IN_PERCENT, ADMIN_CHAT_ID
 
 logger = logging.getLogger(__name__)
 
 form_router = Router()
 
-OPERATION = ['EURO2RUB', 'RUB2EURO']
-CURRENCY = ['EUR']
-keyboard = ReplyKeyboardMarkup(resize_keyboard=True, keyboard=[
-    [
-        KeyboardButton(text='30000'),
-        KeyboardButton(text='50000'),
-        KeyboardButton(text='60000'),
-    ]
-], )
+OPERATION = [
+    'EURO2RUB',
+    # 'RUB2EURO'
+]
+CURRENCY = [
+    'EUR',
+    'RUB'
+]
 
 
 async def show_summary(message: Message, data: dict[str, Any], positive: bool = True) -> None:
@@ -37,20 +36,50 @@ async def show_summary(message: Message, data: dict[str, Any], positive: bool = 
     await message.answer(text=text, reply_markup=ReplyKeyboardRemove())
 
 
-class Form(StatesGroup):
+class Exchange(StatesGroup):
+    operation = State()
+    amount = State()
     currency = State()
-    source_amount = State()
-    target_amount = State()
-    language = State()
+    total = State()
+
 
 
 @form_router.message(Command("exchange"))
 async def exchange(message: Message, state: FSMContext) -> None:
-    await state.set_state(Form.currency)
     logger.info("start exchange")
+    await state.set_state(Exchange.operation)
 
     await message.answer(
-        "Hello! What's currency you want to exchange? Only EUR is available for now.",
+        "Hello! What's exchange operation do you want to do?",
+        reply_markup=ReplyKeyboardMarkup(
+            keyboard=[
+                [KeyboardButton(text=item) for item in OPERATION]
+            ],
+            resize_keyboard=True,
+        ),
+    )
+
+
+@form_router.message(Exchange.operation)
+async def process_operation(message: Message, state: FSMContext) -> None:
+    logger.info("start choose operation")
+
+    operation = message.text
+    if operation not in OPERATION:
+        await message.answer("Please select a valid operation",
+                             reply_markup=ReplyKeyboardMarkup(
+                                 keyboard=[
+                                     [KeyboardButton(text=item) for item in OPERATION]
+                                 ],
+                                 resize_keyboard=True,
+                             ),
+                             )
+        return
+    await state.update_data(operation=operation)
+
+    await state.set_state(Exchange.amount)
+    await message.answer(
+        "Choose the currency for which you know the exact amount.",
         reply_markup=ReplyKeyboardMarkup(
             keyboard=[
                 [KeyboardButton(text=item) for item in CURRENCY]
@@ -60,62 +89,57 @@ async def exchange(message: Message, state: FSMContext) -> None:
     )
 
 
-@form_router.message(Form.currency)
-async def process_amount(message: Message, state: FSMContext) -> None:
+@form_router.message(Exchange.amount)
+async def process_entered_amount(message: Message, state: FSMContext) -> None:
+    logger.info("start choose amount")
+
     currency = message.text
-    await state.update_data(action=currency)
     if currency not in CURRENCY:
-        await message.answer("Please select a valid currency", resize_keyboard=True)
+        await message.answer("Please select a valid currency",
+                             reply_markup=ReplyKeyboardMarkup(
+                                 keyboard=[
+                                     [KeyboardButton(text=item) for item in CURRENCY]
+                                 ],
+                                 resize_keyboard=True,
+                             ),
+                             )
         return
-    await state.set_state(Form.source_amount)
-    await message.answer("Please enter or choose on keyboard an amount rubles you need to get",
-                         reply_markup=keyboard, resize_keyboard=True)
+    await state.update_data(currency=currency)
+
+    await state.set_state(Exchange.total)
+    await message.answer("Enter or choose on keyboard an amount you need to get",
+                         resize_keyboard=True, reply_markup=ReplyKeyboardRemove(),)
 
 
-# @form_router.message(Form.source_amount)
-# async def process_amount(message: Message, state: FSMContext) -> None:
-#     action = await state.update_data(action=message.text)
-#     await state.set_state(Form.source_amount)
-#     if action == 'EURO2RUB':
-#         rate = await rates(source='EUR', target='RUB')
-#     await message.answer("Please enter an amount from 100 to 1000",
-#                          reply_markup=keyboard, action=action)
-
-@form_router.message(Form.source_amount)
-async def process_entered_amount(message: Message) -> None:
+@form_router.message(Exchange.total)
+async def process_entered_amount(message: Message, state: FSMContext) -> None:
+    logger.info("start choose amount")
     try:
-        source_amount = int(message.text)
-        if 10_000 <= source_amount <= 200_000:
-            rate = await rates(source='RUB', target='EUR')
-            amount = round(source_amount * rate * (1 + EXCHANGE_FEE_IN_PERCENT / 100)
-                           + WITHDRAWAL_FEE, 0)
-            # The amount is valid, you can proceed with your logic here
-            link = await payment_requests("EUR", amount=amount)
-            await message.answer(f"Commission of service: {WITHDRAWAL_FEE} \n"
-                                 f"Conversion fee: {EXCHANGE_FEE_IN_PERCENT}% \n"
-                                 f"Exchange rate: {rate} \n"
-                                 f"Link for payment: {link}")
-            await message.bot.send_message(210408407,
-                                           text=f"Receive a new payment request from "
-                                                f"{message.from_user.full_name}(@{message.from_user.username}).")
-
-        else:
-            await message.reply("Please enter a valid amount between 10_000 and 200_000.", reply_markup=ForceReply())
+        amount = int(message.text)
     except ValueError:
-        await message.reply("Please enter a valid integer.", reply_markup=ForceReply())
-    # await state.set_state(Form.like_bots)
-    # await message.answer(
-    #     f"Nice to meet you, {html.quote(message.text)}!\nDid you like to write bots?",
-    #     reply_markup=ReplyKeyboardMarkup(
-    #         keyboard=[
-    #             [
-    #                 KeyboardButton(text="Yes"),
-    #                 KeyboardButton(text="No"),
-    #             ]
-    #         ],
-    #         resize_keyboard=True,
-    #     ),
-    # )
+        await message.answer("Please enter a valid amount")
+        return
+
+    data = await state.get_data()
+    currency = data.get("currency")
+    operation = data.get("operation")
+
+    rate = await rates(source='RUB', target='EUR')
+
+    if currency != 'EUR':
+        amount = round(amount * rate * (1 + EXCHANGE_FEE_IN_PERCENT / 100)
+                       + WITHDRAWAL_FEE, 0)
+    # The amount is valid, you can proceed with your logic here
+    link = await payment_requests("EUR", amount=amount)
+    await message.answer(f"Commission of service: {WITHDRAWAL_FEE} \n"
+                         f"Conversion fee: {EXCHANGE_FEE_IN_PERCENT}% \n"
+                         f"Exchange rate: {round(1 / rate, 2)} \n"
+                         f"Link for payment: {link} \n\n"
+                         f"Please pay the amount of {amount} EUR to the link above. \n",
+                         reply_markup=ReplyKeyboardRemove())
+    await message.bot.send_message(ADMIN_CHAT_ID,
+                                   text=f"Receive a new payment request from "
+                                        f"{message.from_user.full_name}(@{message.from_user.username}).")
 
 
 # @form_router.message(Form.like_bots, F.text.casefold() == "no")
@@ -139,17 +163,17 @@ async def process_entered_amount(message: Message) -> None:
 #     )
 
 
-@form_router.message(Form.language)
-async def process_language(message: Message, state: FSMContext) -> None:
-    data = await state.update_data(language=message.text)
-    await state.clear()
-
-    if message.text.casefold() == "python":
-        await message.reply(
-            "Python, you say? That's the language that makes my circuits light up! 😉"
-        )
-
-    await show_summary(message=message, data=data)
+# @form_router.message(Exchange.language)
+# async def process_language(message: Message, state: FSMContext) -> None:
+#     data = await state.update_data(language=message.text)
+#     await state.clear()
+#
+#     if message.text.casefold() == "python":
+#         await message.reply(
+#             "Python, you say? That's the language that makes my circuits light up! 😉"
+#         )
+#
+#     await show_summary(message=message, data=data)
 
 
 @form_router.message(Command("cancel"))

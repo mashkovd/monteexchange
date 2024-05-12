@@ -43,7 +43,7 @@ async def command_start_handler(message: Message) -> None:
 
     logger.info(f"Hello, {html.bold(message.from_user.full_name)}!")
     chat_id = message.chat.id
-    await message.reply(f"Your chat ID is: {chat_id}")
+    # await message.reply(f"Your chat ID is: {chat_id}")
     await message.answer(f"Hello, {html.bold(message.from_user.full_name)}!\n\n"
                          f"I'm a bot that can exchange currency.\n\n"
                          f"Use the following commands:\n"
