@@ -9,6 +9,8 @@ from aiogram.types import (
     Message,
     ReplyKeyboardMarkup,
     ReplyKeyboardRemove,
+    InlineKeyboardMarkup,
+    InlineKeyboardButton,
 )
 
 from config import ADMIN_CHAT_ID, EXCHANGE_FEE_IN_PERCENT, WITHDRAWAL_FEE_IN_EURO
@@ -23,6 +25,16 @@ OPERATION = [
     # 'RUB2EURO'
 ]
 CURRENCY = ["EUR", "RUB"]
+
+# Define a function to create the menu keyboard
+def menu_keyboard():
+    keyboard = InlineKeyboardMarkup(row_width=2)
+    keyboard.add(
+        InlineKeyboardButton("Option 1", callback_data="option1"),
+        InlineKeyboardButton("Option 2", callback_data="option2"),
+        InlineKeyboardButton("Command", callback_data="command"),
+    )
+    return keyboard
 
 
 class Exchange(StatesGroup):
@@ -114,7 +126,7 @@ async def process_total(message: Message, state: FSMContext) -> None:
     if currency == "RUB":
         amount_in_currency = round(
             amount * rate * (1 + EXCHANGE_FEE_IN_PERCENT / 100)
-            + WITHDRAWAL_FEE_IN_EURO * rate,
+            + WITHDRAWAL_FEE_IN_EURO,
             0,
         )
         link = await payment_requests("EUR", amount=amount_in_currency)
