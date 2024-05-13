@@ -11,7 +11,7 @@ from aiogram.types import (
     ReplyKeyboardRemove,
 )
 
-from config import ADMIN_CHAT_ID, EXCHANGE_FEE_IN_PERCENT, WITHDRAWAL_FEE
+from config import ADMIN_CHAT_ID, EXCHANGE_FEE_IN_PERCENT, WITHDRAWAL_FEE_IN_EURO
 from utils import payment_requests, rates
 
 logger = logging.getLogger(__name__)
@@ -113,14 +113,15 @@ async def process_total(message: Message, state: FSMContext) -> None:
 
     if currency == "RUB":
         amount_in_currency = round(
-            amount * rate * (1 + EXCHANGE_FEE_IN_PERCENT / 100) + WITHDRAWAL_FEE * rate,
+            amount * rate * (1 + EXCHANGE_FEE_IN_PERCENT / 100)
+            + WITHDRAWAL_FEE_IN_EURO * rate,
             0,
         )
         link = await payment_requests("EUR", amount=amount_in_currency)
         await message.answer(
-            f"Commission of service: {WITHDRAWAL_FEE} \n"
-            f"Conversion fee: {EXCHANGE_FEE_IN_PERCENT}% \n"
-            f"Exchange rate: {round(1 / rate, 2)} \n"
+            f"Commission of service, EUR: {WITHDRAWAL_FEE_IN_EURO} \n"
+            f"Conversion fee, %: {EXCHANGE_FEE_IN_PERCENT} \n"
+            f"Exchange rate, {operation}: {round(1 / rate, 2)} \n"
             f"Link for payment: {link} \n\n"
             f"Please pay the amount of {amount_in_currency} {operation.split('2')[0]} for {operation} exchange\n"
             f"to the link above for get {amount} {currency}. \n",
@@ -128,11 +129,13 @@ async def process_total(message: Message, state: FSMContext) -> None:
         )
     elif currency == "EUR":
         amount_in_currency = round(
-            amount / rate * (1 - EXCHANGE_FEE_IN_PERCENT / 100) - WITHDRAWAL_FEE, 0
+            amount / rate * (1 - EXCHANGE_FEE_IN_PERCENT / 100)
+            - WITHDRAWAL_FEE_IN_EURO,
+            0,
         )
         link = await payment_requests("EUR", amount=amount)
         await message.answer(
-            f"Commission of service: {WITHDRAWAL_FEE} \n"
+            f"Commission of service: {WITHDRAWAL_FEE_IN_EURO} \n"
             f"Conversion fee: {EXCHANGE_FEE_IN_PERCENT}% \n"
             f"Exchange rate: {round(1 / rate, 2)} \n"
             f"Link for payment: {link} \n\n"
