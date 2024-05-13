@@ -113,7 +113,7 @@ async def process_total(message: Message, state: FSMContext) -> None:
 
     if currency == "RUB":
         amount_in_currency = round(
-            amount * rate * (1 + EXCHANGE_FEE_IN_PERCENT / 100) + WITHDRAWAL_FEE / rate,
+            amount * rate * (1 + EXCHANGE_FEE_IN_PERCENT / 100) + WITHDRAWAL_FEE * rate,
             0,
         )
         link = await payment_requests("EUR", amount=amount_in_currency)
