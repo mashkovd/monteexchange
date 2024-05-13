@@ -111,9 +111,10 @@ async def process_total(message: Message, state: FSMContext) -> None:
 
     rate = await rates(source="RUB", target="EUR")
 
-    if currency != "EUR":
+    if currency == "RUB":
         amount_in_currency = round(
-            amount * rate * (1 + EXCHANGE_FEE_IN_PERCENT / 100) + WITHDRAWAL_FEE, 0
+            amount * rate * (1 + EXCHANGE_FEE_IN_PERCENT / 100) + WITHDRAWAL_FEE / rate,
+            0,
         )
         link = await payment_requests("EUR", amount=amount_in_currency)
         await message.answer(
@@ -121,14 +122,13 @@ async def process_total(message: Message, state: FSMContext) -> None:
             f"Conversion fee: {EXCHANGE_FEE_IN_PERCENT}% \n"
             f"Exchange rate: {round(1 / rate, 2)} \n"
             f"Link for payment: {link} \n\n"
-            f"Please pay the amount of {amount_in_currency} {currency} for {operation} exchange\n"
+            f"Please pay the amount of {amount_in_currency} {operation.split('2')[0]} for {operation} exchange\n"
             f"to the link above for get {amount} {currency}. \n",
             reply_markup=ReplyKeyboardRemove(),
         )
-    else:
+    elif currency == "EUR":
         amount_in_currency = round(
-            amount / rate * (1 + EXCHANGE_FEE_IN_PERCENT / 100) + WITHDRAWAL_FEE / rate,
-            0,
+            amount / rate * (1 - EXCHANGE_FEE_IN_PERCENT / 100) - WITHDRAWAL_FEE, 0
         )
         link = await payment_requests("EUR", amount=amount)
         await message.answer(
@@ -136,7 +136,7 @@ async def process_total(message: Message, state: FSMContext) -> None:
             f"Conversion fee: {EXCHANGE_FEE_IN_PERCENT}% \n"
             f"Exchange rate: {round(1 / rate, 2)} \n"
             f"Link for payment: {link} \n\n"
-            f"Please pay the amount of {amount} {currency} for {operation} exchange\n"
+            f"Please pay the amount of {amount} {operation.split('2')[0]} for {operation} exchange\n"
             f"to the link above for get {amount_in_currency} {operation.split('2')[1]}. \n",
             reply_markup=ReplyKeyboardRemove(),
         )

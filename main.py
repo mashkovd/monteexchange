@@ -27,7 +27,7 @@ async def echo_currency(message: Message) -> None:
 @dp.message(Command("help"))
 async def help(message: Message) -> None:
     await message.answer(
-        f"If you have any questions, please contact us at @mashkovd. Thank you!\n"
+        f"If you have any questions, please contact us at @mashkovd.\n\n"
         f"version of bot is {pyproject_version}"
     )
 

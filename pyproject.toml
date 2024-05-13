@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "monteexchange"
-version = "0.1.18"
+version = "0.1.19"
 description = ""
 authors = ["Dmitrii.Mashkov <dmitrii.mashkov@libertexgroup.com>"]
 readme = "README.md"
@@ -19,6 +19,10 @@ ruff = "^0.4.4"
 black = "^24.4.2"
 isort = "^5.13.2"
 pre-commit = "^3.7.1"
+
+
+[tool.poetry.group.tests.dependencies]
+pytest = "^8.2.0"
 
 [build-system]
 requires = ["poetry-core"]
