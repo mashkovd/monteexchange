@@ -137,7 +137,7 @@ async def process_total(message: Message, state: FSMContext) -> None:
             f"Exchange rate: {round(1 / rate, 2)} \n"
             f"Link for payment: {link} \n\n"
             f"Please pay the amount of {amount} {currency} for {operation} exchange\n"
-            f"to the link above for get {amount_in_currency} {operation.split('2')[0]}. \n",
+            f"to the link above for get {amount_in_currency} {operation.split('2')[1]}. \n",
             reply_markup=ReplyKeyboardRemove(),
         )
     await message.bot.send_message(
