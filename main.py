@@ -5,7 +5,7 @@ from aiogram.enums import ParseMode
 from aiogram.types import Message
 from aiogram.filters import Command, CommandStart
 from aiogram.client.default import DefaultBotProperties
-from router.exchange import form_router
+from router.exchange import router
 import logging
 import sys
 import certifi
@@ -57,7 +57,7 @@ async def main() -> None:
     bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
     await bot.delete_webhook(drop_pending_updates=True)
     # And the run events dispatching
-    dp.include_router(form_router)
+    dp.include_router(router)
     await dp.start_polling(bot)
 
 

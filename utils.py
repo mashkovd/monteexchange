@@ -5,7 +5,7 @@ import aiohttp
 from config import WISE_HOST, WISE_TOKEN, PROFILE_ID, BALANCE_ID
 
 
-async def payment_requests(currency: str, amount: str):
+async def payment_requests(currency: str, amount: int):
     # You can customize the SSL context as needed
     ssl_context = ssl.create_default_context(cafile=certifi.where())
 

@@ -12,7 +12,7 @@ from config import WITHDRAWAL_FEE, EXCHANGE_FEE_IN_PERCENT, ADMIN_CHAT_ID
 
 logger = logging.getLogger(__name__)
 
-form_router = Router()
+router = Router()
 
 OPERATION = [
     'EURO2RUB',
@@ -24,18 +24,6 @@ CURRENCY = [
 ]
 
 
-async def show_summary(message: Message, data: dict[str, Any], positive: bool = True) -> None:
-    name = data["name"]
-    language = data.get("language", "<something unexpected>")
-    text = f"I'll keep in mind that, {html.quote(name)}, "
-    text += (
-        f"you like to write bots with {html.quote(language)}."
-        if positive
-        else "you don't like to write bots, so sad..."
-    )
-    await message.answer(text=text, reply_markup=ReplyKeyboardRemove())
-
-
 class Exchange(StatesGroup):
     operation = State()
     amount = State()
@@ -43,8 +31,7 @@ class Exchange(StatesGroup):
     total = State()
 
 
-
-@form_router.message(Command("exchange"))
+@router.message(Command("exchange"))
 async def exchange(message: Message, state: FSMContext) -> None:
     logger.info("start exchange")
     await state.set_state(Exchange.operation)
@@ -60,7 +47,7 @@ async def exchange(message: Message, state: FSMContext) -> None:
     )
 
 
-@form_router.message(Exchange.operation)
+@router.message(Exchange.operation)
 async def process_operation(message: Message, state: FSMContext) -> None:
     logger.info("start choose operation")
 
@@ -79,7 +66,7 @@ async def process_operation(message: Message, state: FSMContext) -> None:
 
     await state.set_state(Exchange.amount)
     await message.answer(
-        "Choose the currency for which you know the exact amount.",
+        "Please select the currency of which you have the precise amount to be exchanged",
         reply_markup=ReplyKeyboardMarkup(
             keyboard=[
                 [KeyboardButton(text=item) for item in CURRENCY]
@@ -89,7 +76,7 @@ async def process_operation(message: Message, state: FSMContext) -> None:
     )
 
 
-@form_router.message(Exchange.amount)
+@router.message(Exchange.amount)
 async def process_entered_amount(message: Message, state: FSMContext) -> None:
     logger.info("start choose amount")
 
@@ -107,11 +94,11 @@ async def process_entered_amount(message: Message, state: FSMContext) -> None:
     await state.update_data(currency=currency)
 
     await state.set_state(Exchange.total)
-    await message.answer("Enter or choose on keyboard an amount you need to get",
-                         resize_keyboard=True, reply_markup=ReplyKeyboardRemove(),)
+    await message.answer("Please input the amount you want to exchange",
+                         resize_keyboard=True, reply_markup=ReplyKeyboardRemove(), )
 
 
-@form_router.message(Exchange.total)
+@router.message(Exchange.total)
 async def process_entered_amount(message: Message, state: FSMContext) -> None:
     logger.info("start choose amount")
     try:
@@ -127,16 +114,26 @@ async def process_entered_amount(message: Message, state: FSMContext) -> None:
     rate = await rates(source='RUB', target='EUR')
 
     if currency != 'EUR':
-        amount = round(amount * rate * (1 + EXCHANGE_FEE_IN_PERCENT / 100)
-                       + WITHDRAWAL_FEE, 0)
-    # The amount is valid, you can proceed with your logic here
-    link = await payment_requests("EUR", amount=amount)
-    await message.answer(f"Commission of service: {WITHDRAWAL_FEE} \n"
-                         f"Conversion fee: {EXCHANGE_FEE_IN_PERCENT}% \n"
-                         f"Exchange rate: {round(1 / rate, 2)} \n"
-                         f"Link for payment: {link} \n\n"
-                         f"Please pay the amount of {amount} EUR to the link above. \n",
-                         reply_markup=ReplyKeyboardRemove())
+        amount_in_currency = round(amount * rate * (1 + EXCHANGE_FEE_IN_PERCENT / 100)
+                                   + WITHDRAWAL_FEE, 0)
+        link = await payment_requests("EUR", amount=amount_in_currency)
+        await message.answer(f"Commission of service: {WITHDRAWAL_FEE} \n"
+                             f"Conversion fee: {EXCHANGE_FEE_IN_PERCENT}% \n"
+                             f"Exchange rate: {round(1 / rate, 2)} \n"
+                             f"Link for payment: {link} \n\n"
+                             f"Please pay the amount of {amount_in_currency} for {operation} exchange"
+                             f"to the link above for get {amount} {currency}. \n",
+                             reply_markup=ReplyKeyboardRemove())
+    else:
+        amount_in_currency = round((amount - WITHDRAWAL_FEE) / rate * (1 - EXCHANGE_FEE_IN_PERCENT / 100), 0)
+        link = await payment_requests("EUR", amount=amount)
+        await message.answer(f"Commission of service: {WITHDRAWAL_FEE} \n"
+                             f"Conversion fee: {EXCHANGE_FEE_IN_PERCENT}% \n"
+                             f"Exchange rate: {round(1 / rate, 2)} \n"
+                             f"Link for payment: {link} \n\n"
+                             f"Please pay the amount of {amount} for {operation} exchange"
+                             f"to the link above for get {amount_in_currency} {currency}. \n",
+                             reply_markup=ReplyKeyboardRemove())
     await message.bot.send_message(ADMIN_CHAT_ID,
                                    text=f"Receive a new payment request from "
                                         f"{message.from_user.full_name}(@{message.from_user.username}).")
@@ -176,8 +173,8 @@ async def process_entered_amount(message: Message, state: FSMContext) -> None:
 #     await show_summary(message=message, data=data)
 
 
-@form_router.message(Command("cancel"))
-@form_router.message(F.text.casefold() == "cancel")
+@router.message(Command("cancel"))
+@router.message(F.text.casefold() == "cancel")
 async def cancel_handler(message: Message, state: FSMContext) -> None:
     """
     Allow user to cancel any action
