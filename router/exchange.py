@@ -121,7 +121,7 @@ async def process_entered_amount(message: Message, state: FSMContext) -> None:
                              f"Conversion fee: {EXCHANGE_FEE_IN_PERCENT}% \n"
                              f"Exchange rate: {round(1 / rate, 2)} \n"
                              f"Link for payment: {link} \n\n"
-                             f"Please pay the amount of {amount_in_currency} for {operation} exchange"
+                             f"Please pay the amount of {amount_in_currency} {currency} for {operation} exchange\n"
                              f"to the link above for get {amount} {currency}. \n",
                              reply_markup=ReplyKeyboardRemove())
     else:
@@ -131,8 +131,8 @@ async def process_entered_amount(message: Message, state: FSMContext) -> None:
                              f"Conversion fee: {EXCHANGE_FEE_IN_PERCENT}% \n"
                              f"Exchange rate: {round(1 / rate, 2)} \n"
                              f"Link for payment: {link} \n\n"
-                             f"Please pay the amount of {amount} for {operation} exchange"
-                             f"to the link above for get {amount_in_currency} {currency}. \n",
+                             f"Please pay the amount of {amount} {currency} for {operation} exchange\n"
+                             f"to the link above for get {amount_in_currency} {operation.split('2')[1]}. \n",
                              reply_markup=ReplyKeyboardRemove())
     await message.bot.send_message(ADMIN_CHAT_ID,
                                    text=f"Receive a new payment request from "
