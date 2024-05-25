@@ -26,6 +26,7 @@ OPERATION = [
 ]
 CURRENCY = ["EUR", "RUB"]
 
+
 # Define a function to create the menu keyboard
 def menu_keyboard():
     keyboard = InlineKeyboardMarkup(row_width=2)
@@ -44,18 +45,18 @@ class Exchange(StatesGroup):
     total = State()
 
 
-@router.message(Command("exchange"))
-async def exchange(message: Message, state: FSMContext) -> None:
-    logger.info("start exchange")
-    await state.set_state(Exchange.operation)
-
-    await message.answer(
-        "Hello! What's exchange operation do you want to do?",
-        reply_markup=ReplyKeyboardMarkup(
-            keyboard=[[KeyboardButton(text=item) for item in OPERATION]],
-            resize_keyboard=True,
-        ),
-    )
+# @router.message(Command("exchange"))
+# async def exchange(message: Message, state: FSMContext) -> None:
+#     logger.info("start exchange")
+#     await state.set_state(Exchange.operation)
+#
+#     await message.answer(
+#         "Hello! What's exchange operation do you want to do?",
+#         reply_markup=ReplyKeyboardMarkup(
+#             keyboard=[[KeyboardButton(text=item) for item in OPERATION]],
+#             resize_keyboard=True,
+#         ),
+#     )
 
 
 @router.message(Exchange.operation)
@@ -84,25 +85,13 @@ async def process_operation(message: Message, state: FSMContext) -> None:
     )
 
 
-@router.message(Exchange.amount)
+@router.message(Command("exchange"))
 async def process_entered_amount(message: Message, state: FSMContext) -> None:
     logger.info("start choose amount")
 
-    currency = message.text
-    if currency not in CURRENCY:
-        await message.answer(
-            "Please select a valid currency",
-            reply_markup=ReplyKeyboardMarkup(
-                keyboard=[[KeyboardButton(text=item) for item in CURRENCY]],
-                resize_keyboard=True,
-            ),
-        )
-        return
-    await state.update_data(currency=currency)
-
     await state.set_state(Exchange.total)
     await message.answer(
-        "Please input the amount you want to exchange",
+        "Please input the amount you want to exchange in RUB",
         resize_keyboard=True,
         reply_markup=ReplyKeyboardRemove(),
     )
@@ -118,11 +107,11 @@ async def process_total(message: Message, state: FSMContext) -> None:
         return
 
     data = await state.get_data()
-    currency = data.get("currency")
+    currency = data.get("currency", "RUB")
     operation = data.get("operation")
 
     rate = await rates(source="RUB", target="EUR")
-
+    text = ""
     if currency == "RUB":
         amount_in_currency = round(
             amount * rate * (1 + EXCHANGE_FEE_IN_PERCENT / 100)
@@ -130,15 +119,17 @@ async def process_total(message: Message, state: FSMContext) -> None:
             0,
         )
         link = await payment_requests("EUR", amount=amount_in_currency)
-        await message.answer(
-            f"Commission of service, EUR: {WITHDRAWAL_FEE_IN_EURO} \n"
-            f"Conversion fee, %: {EXCHANGE_FEE_IN_PERCENT} \n"
-            f"Exchange rate, {operation}: {round(1 / rate, 2)} \n"
-            f"Link for payment: {link} \n\n"
-            f"Please pay the amount of {amount_in_currency} {operation.split('2')[0]} for {operation} exchange\n"
-            f"to the link above for get {amount} {currency}. \n",
-            reply_markup=ReplyKeyboardRemove(),
+
+        text = (
+            f"Service Commission (EUR): {WITHDRAWAL_FEE_IN_EURO}\n"
+            f"Conversion Fee (%): {EXCHANGE_FEE_IN_PERCENT}\n"
+            f"Exchange Rate: {round(1 / rate, 2)}\n"
+            f"Payment Link: {link}\n\n"
+            f"Please pay {amount_in_currency} EUR upon exchange to receive {amount} {currency}.\n"
         )
+
+        await message.answer(text, reply_markup=ReplyKeyboardRemove())
+
     elif currency == "EUR":
         amount_in_currency = round(
             amount / rate * (1 - EXCHANGE_FEE_IN_PERCENT / 100)
@@ -158,7 +149,8 @@ async def process_total(message: Message, state: FSMContext) -> None:
     await message.bot.send_message(
         ADMIN_CHAT_ID,
         text=f"Receive a new payment request from "
-        f"{message.from_user.full_name}(@{message.from_user.username}).",
+        f"{message.from_user.full_name}(@{message.from_user.username})."
+        f"with text: {text}",
     )
 
 
