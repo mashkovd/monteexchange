@@ -91,7 +91,7 @@ async def process_entered_amount(message: Message, state: FSMContext) -> None:
 
     await state.set_state(Exchange.total)
     await message.answer(
-        "Please input the amount you want to exchange in RUB",
+        "Please enter the amount you want to exchange in Russian rubles",
         resize_keyboard=True,
         reply_markup=ReplyKeyboardRemove(),
     )
