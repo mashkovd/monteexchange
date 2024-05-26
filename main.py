@@ -6,7 +6,7 @@ from aiogram import Bot, Dispatcher, html
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.filters import Command, CommandStart
-from aiogram.types import Message
+from aiogram.types import Message, BotCommand
 
 from config import TOKEN
 from router.exchange import router
@@ -27,7 +27,7 @@ async def echo_currency(message: Message) -> None:
 @dp.message(Command("help"))
 async def help(message: Message) -> None:
     await message.answer(
-        f"If you have any questions, please contact us at @mashkovd.\n\n"
+        f"If you have any questions, please contact me @mashkovd.\n\n"
         f"version of bot is {pyproject_version}"
     )
 
@@ -60,6 +60,16 @@ async def main() -> None:
     # Initialize Bot instance with default bot properties which will be passed to all API calls
     bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
     await bot.delete_webhook(drop_pending_updates=True)
+    await bot.set_my_commands(
+        [
+            BotCommand(command="/start", description="Start the bot"),
+            BotCommand(command="/exchange", description="Start the exchange process"),
+            BotCommand(
+                command="/rate", description="Get the current rate of EUR to RUB"
+            ),
+            BotCommand(command="/help", description="Get help"),
+        ]
+    )
     # And the run events dispatching
     dp.include_router(router)
     await dp.start_polling(bot)

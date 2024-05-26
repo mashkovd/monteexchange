@@ -9,11 +9,14 @@ from aiogram.types import (
     Message,
     ReplyKeyboardMarkup,
     ReplyKeyboardRemove,
-    InlineKeyboardMarkup,
-    InlineKeyboardButton,
 )
 
-from config import ADMIN_CHAT_ID, EXCHANGE_FEE_IN_PERCENT, WITHDRAWAL_FEE_IN_EURO
+from config import (
+    ADMIN_CHAT_ID,
+    EXCHANGE_FEE_IN_PERCENT,
+    WITHDRAWAL_FEE_IN_EURO,
+    REFERRAL_LINK,
+)
 from utils import payment_requests, rates
 
 logger = logging.getLogger(__name__)
@@ -25,17 +28,6 @@ OPERATION = [
     # 'RUB2EURO'
 ]
 CURRENCY = ["EUR", "RUB"]
-
-
-# Define a function to create the menu keyboard
-def menu_keyboard():
-    keyboard = InlineKeyboardMarkup(row_width=2)
-    keyboard.add(
-        InlineKeyboardButton("Option 1", callback_data="option1"),
-        InlineKeyboardButton("Option 2", callback_data="option2"),
-        InlineKeyboardButton("Command", callback_data="command"),
-    )
-    return keyboard
 
 
 class Exchange(StatesGroup):
@@ -125,7 +117,9 @@ async def process_total(message: Message, state: FSMContext) -> None:
             f"Conversion Fee (%): {EXCHANGE_FEE_IN_PERCENT}\n"
             f"Exchange Rate: {round(1 / rate, 2)}\n"
             f"Payment Link: {link}\n\n"
-            f"Please pay {amount_in_currency} EUR upon exchange to receive {amount} {currency}.\n"
+            f"Please pay {amount_in_currency} EUR upon exchange to receive {amount} {currency}.\n\n"
+            f"If you not registered in Wise, "
+            f"please register by this referral link: {REFERRAL_LINK}\n"
         )
 
         await message.answer(text, reply_markup=ReplyKeyboardRemove())
