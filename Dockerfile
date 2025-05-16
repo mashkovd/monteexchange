@@ -1,23 +1,22 @@
-# Use an official Python slim runtime as a parent image
 FROM python:3.12-slim
 
-# Install Poetry
-RUN pip install poetry
+# Install uv
+RUN pip install --no-cache-dir uv
 
-# Set the working directory in the container to /app
+# Set working directory
 WORKDIR /app
 
-# Add pyproject.toml and poetry.lock file into the container at /app
-ADD pyproject.toml poetry.lock /app/
+# Add dependency files
+COPY pyproject.toml uv.lock /app/
 
-# Install any needed packages specified in pyproject.toml
-RUN poetry install --no-dev --no-interaction --no-ansi
+# Install dependencies using uv
+RUN uv sync
 
-# Add the current directory contents into the container at /app
-ADD . /app
+# Copy the rest of the application code
+COPY . /app
 
-# Make port 80 available to the world outside this container
+# Expose port
 EXPOSE 80
 
-# Run app.py when the container launches
-CMD ["poetry", "run", "python", "main.py"]
+# Run the application
+CMD ["uv", "run", "main.py"]

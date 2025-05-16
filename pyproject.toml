@@ -1,29 +1,21 @@
-[tool.poetry]
+[project]
 name = "monteexchange"
-version = "0.1.27"
-description = ""
-authors = ["Dmitrii.Mashkov <dmitrii.mashkov@libertexgroup.com>"]
+version = "0.1.0"
+description = "Add your description here"
 readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "aiogram>=3.20.0.post0",
+    "aiohttp>=3.11.18",
+    "certifi>=2025.4.26",
+    "environs>=14.1.1",
+    "toml>=0.10.2",
+]
 
-[tool.poetry.dependencies]
-python = "^3.12"
-aiogram = "^3.5.0"
-environs = "^11.0.0"
-aiohttp = "^3.9.5"
-certifi = "^2024.2.2"
-toml = "^0.10.2"
-
-
-[tool.poetry.group.dev.dependencies]
-ruff = "^0.4.4"
-black = "^24.4.2"
-isort = "^5.13.2"
-pre-commit = "^3.7.1"
-
-
-[tool.poetry.group.tests.dependencies]
-pytest = "^8.2.0"
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+[dependency-groups]
+dev = [
+    "black>=25.1.0",
+    "isort>=6.0.1",
+    "pre-commit>=4.2.0",
+    "ruff>=0.11.10",
+]
