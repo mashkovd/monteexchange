@@ -143,7 +143,7 @@ async def process_total(message: Message, state: FSMContext) -> None:
     await message.bot.send_message(
         ADMIN_CHAT_ID,
         text=f"Receive a new payment request from "
-        f"{message.from_user.full_name}(@{message.from_user.username}):\n"
+        f"{message.from_user.full_name}(@{message.from_user.username})\n"
         f"{text}",
     )
 
