@@ -12,10 +12,26 @@ from config import TOKEN
 from router.exchange import router
 from utils import pyproject_version, rates
 
+from aiohttp import web
+
 logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 logger = logging.getLogger(__name__)
 
 dp = Dispatcher()
+
+
+# Health check handler
+async def healthcheck(request):
+    return web.json_response({"status": "ok"})
+
+
+async def start_healthcheck_server():
+    app = web.Application()
+    app.router.add_get("/health", healthcheck)
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, "0.0.0.0", 8080)
+    await site.start()
 
 
 @dp.message(Command("rate"))
@@ -34,18 +50,7 @@ async def help(message: Message) -> None:
 
 @dp.message(CommandStart())
 async def command_start_handler(message: Message) -> None:
-    """
-    This handler receives messages with `/start` command
-    """
-    # Most event objects have aliases for API methods that can be called in events' context
-    # For example if you want to answer to incoming message you can use `message.answer(...)` alias
-    # and the target chat will be passed to :ref:`aiogram.methods.send_message.SendMessage`
-    # method automatically or call API method directly via
-    # Bot instance: `bot.send_message(chat_id=message.chat.id, ...)`
-
     logger.info(f"Hello, {html.bold(message.from_user.full_name)}!")
-    # chat_id = message.chat.id
-    # await message.reply(f"Your chat ID is: {chat_id}")
     await message.answer(
         f"Hello, {html.bold(message.from_user.full_name)}!\n\n"
         f"I'm a bot that can exchange currency.\n\n"
@@ -57,6 +62,9 @@ async def command_start_handler(message: Message) -> None:
 
 
 async def main() -> None:
+    # Start healthcheck server in background
+    asyncio.create_task(start_healthcheck_server())
+
     # Initialize Bot instance with default bot properties which will be passed to all API calls
     bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
     await bot.delete_webhook(drop_pending_updates=True)
@@ -70,7 +78,6 @@ async def main() -> None:
             BotCommand(command="/help", description="Get help"),
         ]
     )
-    # And the run events dispatching
     dp.include_router(router)
     await dp.start_polling(bot)
 
