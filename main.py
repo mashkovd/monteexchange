@@ -6,13 +6,12 @@ from aiogram import Bot, Dispatcher, html
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.filters import Command, CommandStart
-from aiogram.types import Message, BotCommand
+from aiogram.types import BotCommand, Message
+from aiohttp import web
 
 from config import TOKEN
 from router.exchange import router
 from utils import pyproject_version, rates
-
-from aiohttp import web
 
 logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 logger = logging.getLogger(__name__)
@@ -23,6 +22,7 @@ dp = Dispatcher()
 # Health check handler
 async def healthcheck(request):
     from utils import pyproject_version
+
     return web.json_response({"status": "ok", "version": pyproject_version})
 
 

@@ -4,19 +4,11 @@ from aiogram import F, Router
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
-from aiogram.types import (
-    KeyboardButton,
-    Message,
-    ReplyKeyboardMarkup,
-    ReplyKeyboardRemove,
-)
+from aiogram.types import (KeyboardButton, Message, ReplyKeyboardMarkup,
+                           ReplyKeyboardRemove)
 
-from config import (
-    ADMIN_CHAT_ID,
-    EXCHANGE_FEE_IN_PERCENT,
-    WITHDRAWAL_FEE_IN_EURO,
-    REFERRAL_LINK,
-)
+from config import (ADMIN_CHAT_ID, EXCHANGE_FEE_IN_PERCENT, REFERRAL_LINK,
+                    WITHDRAWAL_FEE_IN_EURO)
 from utils import payment_requests, rates
 
 logger = logging.getLogger(__name__)
