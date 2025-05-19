@@ -22,7 +22,8 @@ dp = Dispatcher()
 
 # Health check handler
 async def healthcheck(request):
-    return web.json_response({"status": "ok"})
+    from utils import pyproject_version
+    return web.json_response({"status": "ok", "version": pyproject_version})
 
 
 async def start_healthcheck_server():
